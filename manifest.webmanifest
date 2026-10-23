@@ -1,0 +1,18 @@
+{
+  "name": "PaiD Digital Toolbox",
+  "short_name": "PaiD Toolbox",
+  "description": "Free-first tools for engineering, CAD, documents and productivity.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f9f5",
+  "theme_color": "#102b25",
+  "icons": [
+    {
+      "src": "./paid-toolbox-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
