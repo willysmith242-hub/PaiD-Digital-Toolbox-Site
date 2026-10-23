@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b25">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./paid-toolbox-icon.svg" type="image/svg+xml">
+  <meta name="description" content="PaiD Digital Toolbox — free practical tools and trusted resources for everyday work, engineering, CAD and productivity.">
+  <title>PaiD Digital Toolbox — Free tools for real work</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+  
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="PaiD Digital Toolbox home">
+      <span class="brand-mark">P</span>
+      <span>PaiD <b>Digital Toolbox</b></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#toolbox">Toolbox</a>
+      <a href="#calculators">Quick calculators</a>
+      <a href="#offline">Offline kit</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">PRACTICAL TOOLS. ONE PLACE.</p>
+        <h1>Get more work done.<br><span>Spend less to start.</span></h1>
+        <p class="hero-intro">A growing collection of useful digital tools and trusted resources for engineering, CAD, documents and everyday productivity.</p>
+        <a class="primary-button" href="#toolbox">Explore the toolbox <span aria-hidden="true">↘</span></a>
+        <p class="small-note">Free to explore · Mobile-friendly · No account required for these starter tools</p>
+      </div>
+      <div class="hero-panel" aria-label="Toolbox overview">
+        <div class="panel-top"><span class="status-dot"></span> YOUR WORKSPACE</div>
+        <div class="panel-symbol">P<span>+</span></div>
+        <p class="panel-title">One toolbox.<br>Many ways to work smarter.</p>
+        <div class="panel-tags"><span>Engineering</span><span>Documents</span><span>Productivity</span></div>
+        <div class="panel-line"></div>
+        <p class="panel-foot">Built step by step, with free-first resources.</p>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Project principles">
+      <div><strong>01</strong><span>Free-first resources</span></div>
+      <div><strong>02</strong><span>Useful everyday tools</span></div>
+      <div><strong>03</strong><span>Built for phone and desktop</span></div>
+    </section>
+
+    <section class="section" id="toolbox">
+      <div class="section-heading">
+        <div><p class="eyebrow">FIND YOUR NEXT TOOL</p><h2>The toolbox</h2></div>
+        <p>Search the starter collection by tool or task. New tools can be added as the project grows.</p>
+      </div>
+      <label class="search-box" for="tool-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="tool-search" type="search" placeholder="Search CAD, PDF, engineering…" autocomplete="off">
+        <kbd>/</kbd>
+      </label>
+      <div class="filter-row" role="group" aria-label="Filter tools">
+        <button class="filter-chip active" type="button" data-filter="all" aria-pressed="true">All tools</button>
+        <button class="filter-chip" type="button" data-filter="engineering" aria-pressed="false">Engineering</button>
+        <button class="filter-chip" type="button" data-filter="documents" aria-pressed="false">Documents & PDF</button>
+        <button class="filter-chip" type="button" data-filter="design" aria-pressed="false">CAD & design</button>
+        <button class="filter-chip" type="button" data-filter="productivity" aria-pressed="false">Productivity</button>
+      </div>
+      <div class="tool-grid" id="tool-grid" aria-live="polite">
+        <article class="tool-card" data-category="engineering" data-search="engineering unit conversion measurement metric imperial calculator">
+          <div class="tool-icon green">↔</div><p class="card-label">ENGINEERING</p><h3>Unit converter</h3>
+          <p>Convert common measurements between metric and imperial units.</p>
+          <a href="#calculators">Open converter <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="tool-card" data-category="productivity" data-search="percentage calculator cost budget estimate maths">
+          <div class="tool-icon yellow">%</div><p class="card-label">PRODUCTIVITY</p><h3>Percentage calculator</h3>
+          <p>Work out a percentage of a number quickly, right in your browser.</p>
+          <a href="#calculators">Open calculator <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="tool-card" data-category="documents" data-search="pdf documents merge compress convert read organize">
+          <div class="tool-icon purple">PDF</div><p class="card-label">DOCUMENTS & PDF</p><h3>PDF resources</h3>
+          <p>Find free options for viewing, organizing and working with PDF files.</p>
+          <a href="https://www.pdfgear.com/" target="_blank" rel="noopener noreferrer">Explore PDFgear <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="tool-card" data-category="design" data-search="DWG DXF AutoCAD CAD drawing viewer open inspect zoom pan layers">
+          <div class="tool-icon blue">DWG</div><p class="card-label">CAD & DESIGN</p><h3>DWG / DXF viewer</h3>
+          <p>Open the browser-based CAD viewer to inspect supported 2D DWG and DXF drawings. Large or newer drawings may not load perfectly.</p>
+          <a href="https://mlightcad.com/cad-viewer/" target="_blank" rel="noopener noreferrer">Open CAD viewer <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="tool-card" data-category="documents" data-search="PDF to DWG DXF converter convert CAD drawing vector scanned engineering">
+          <div class="tool-icon purple">PDF→CAD</div><p class="card-label">DOCUMENTS & PDF</p><h3>PDF to DWG / DXF</h3>
+          <p>Try a free browser-based converter. Vector PDFs usually convert better than scanned drawings; check scale and geometry afterwards.</p>
+          <a href="#pdf-converter">Convert a vector PDF here <span aria-hidden="true">↓</span></a>
+        </article>
+        <article class="tool-card" data-category="design" data-search="CAD computer aided design 2D 3D drawing freecad opensource">
+          <div class="tool-icon blue">▱</div><p class="card-label">CAD & DESIGN</p><h3>FreeCAD</h3>
+          <p>Explore a free, open-source 3D parametric CAD application.</p>
+          <a href="https://www.freecad.org/" target="_blank" rel="noopener noreferrer">Visit FreeCAD <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="tool-card" data-category="engineering" data-search="engineering reference standards measurements safety technical documentation">
+          <div class="tool-icon orange">⌁</div><p class="card-label">ENGINEERING</p><h3>Engineering reference desk</h3>
+          <p>A place to build a curated library of verified technical references and learning resources.</p>
+          <a href="https://www.nist.gov/pml/owm/metric-si/si-units" target="_blank" rel="noopener noreferrer">SI units reference <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="tool-card" data-category="productivity" data-search="productivity notes planning office documents libreoffice free">
+          <div class="tool-icon pink">✳</div><p class="card-label">PRODUCTIVITY</p><h3>Office suite</h3>
+          <p>Create documents, spreadsheets and presentations with free desktop software.</p>
+          <a href="https://www.libreoffice.org/" target="_blank" rel="noopener noreferrer">Visit LibreOffice <span aria-hidden="true">↗</span></a>
+        </article>
+      </div>
+      <p class="empty-state" id="empty-state" hidden>No matching tools yet. Try a different search.</p>
+      <p class="disclaimer">External resources are third-party websites. Check their terms and privacy practices before uploading sensitive documents.</p>
+    </section>
+
+
+    <section class="converter-section" id="pdf-converter">
+      <div class="section-heading">
+        <div><p class="eyebrow">COMING BACK AFTER VERIFICATION</p><h2>PDF to DXF converter</h2></div>
+        <p>This feature is being prepared for the public website. The conversion engine is not included in this copy yet, so conversion is temporarily unavailable.</p>
+      </div>
+      <div class="converter-card">
+        <p><strong>What to know:</strong> Vector PDFs may be convertible to DXF; scanned/image-only PDFs usually need a different process. DXF is not the same as native DWG.</p>
+        <p>Never use converted drawings for fabrication, construction, or safety-critical work without checking scale, dimensions and geometry in CAD.</p>
+      </div>
+    </section>
+
+<section class="calculator-section" id="calculators">
+      <div class="section-heading">
+        <div><p class="eyebrow">SMALL TASKS, MADE EASIER</p><h2>Quick calculators</h2></div>
+        <p>These calculators run locally in your browser. Your entries are not sent to a server.</p>
+      </div>
+      <div class="calculator-grid">
+        <form class="calculator-card" id="unit-form">
+          <div class="calc-heading"><span class="calc-number">01</span><h3>Unit converter</h3></div>
+          <label for="unit-value">Value</label>
+          <input id="unit-value" type="number" step="any" value="100" required>
+          <div class="form-row">
+            <div><label for="unit-from">From</label><select id="unit-from"><option value="mm">Millimetres (mm)</option><option value="cm">Centimetres (cm)</option><option value="m" selected>Metres (m)</option><option value="km">Kilometres (km)</option><option value="in">Inches (in)</option><option value="ft">Feet (ft)</option><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option><option value="c">Celsius (°C)</option><option value="f">Fahrenheit (°F)</option></select></div>
+            <button class="swap-button" type="button" id="unit-swap" aria-label="Swap units">⇄</button>
+            <div><label for="unit-to">To</label><select id="unit-to"><option value="mm">Millimetres (mm)</option><option value="cm">Centimetres (cm)</option><option value="m">Metres (m)</option><option value="km">Kilometres (km)</option><option value="in">Inches (in)</option><option value="ft" selected>Feet (ft)</option><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option><option value="c">Celsius (°C)</option><option value="f">Fahrenheit (°F)</option></select></div>
+          </div>
+          <div class="result-box"><span>RESULT</span><output id="unit-result" for="unit-value unit-from unit-to">328.084 ft</output></div>
+        </form>
+        <form class="calculator-card" id="percent-form">
+          <div class="calc-heading"><span class="calc-number">02</span><h3>Percentage calculator</h3></div>
+          <label for="percent-rate">Percentage (%)</label><input id="percent-rate" type="number" step="any" value="15" required>
+          <label for="percent-base">Of this number</label><input id="percent-base" type="number" step="any" value="50000" required>
+          <div class="result-box"><span>RESULT</span><output id="percent-result" for="percent-rate percent-base">7,500</output></div>
+        </form>
+      </div>
+    </section>
+
+
+    <section class="offline-section" id="offline">
+      <div class="section-heading">
+        <div><p class="eyebrow">USEFUL EVEN WITHOUT DATA</p><h2>Offline toolbox & software library</h2></div>
+        <p>Install this lightweight web app for repeat use. Core pages and built-in calculators can be cached for offline use after the site has loaded online once.</p>
+      </div>
+      <div class="offline-grid">
+        <article class="offline-card">
+          <span class="offline-card-icon">↧</span><h3>Install PaiD Toolbox</h3>
+          <p>On supported browsers, use the browser menu and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>. Open it once while online so its core pages can be saved for offline use.</p>
+          <p class="small-note">Offline support depends on your browser and whether the app has been cached. PDF-to-DXF offline use is not verified yet; it depends on the local engine bundle being built and cached successfully.</p>
+        </article>
+        <article class="offline-card">
+          <span class="offline-card-icon">▤</span><h3>Offline quick guide</h3>
+          <p>Save a copy of the offline guide before you lose connection. It explains what works offline and how to prepare software installers.</p>
+          <a class="text-link" href="./offline-guide.html" download="PaiD-Offline-Guide.html">Download offline guide ↗</a>
+        </article>
+        <article class="offline-card">
+          <span class="offline-card-icon">⌘</span><h3>Software download library</h3>
+          <p>Find official sources for legitimate engineering, CAD, office and PDF software. Download the installer while online; keep it on your device or a backup drive.</p>
+          <a class="text-link" href="./software-library.html">Open software library →</a>
+        </article>
+      </div>
+      <p class="disclaimer">PaiD links to official software sources; it does not redistribute third-party installers without permission. Some applications require internet activation, paid licenses or a supported computer. Check each product’s terms and system requirements.</p>
+    </section>
+
+    <section class="about-section" id="about">
+      <div><p class="eyebrow">OUR PRINCIPLE</p><h2>Useful first.<br><span>More possibilities over time.</span></h2></div>
+      <div><p>PaiD Digital Toolbox is being built as a practical directory of free tools and resources for people who work, learn and create. This is the first foundation—not a claim that every tool or conversion service is already built.</p><p>We’ll expand carefully, prioritizing legitimate resources, clear instructions and features that can be maintained without paid services.</p></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><a class="brand footer-brand" href="#top"><span class="brand-mark">P</span><span>PaiD <b>Digital Toolbox</b></span></a><p>Free tools for all. Built step by step.</p><a href="#top">Back to top ↑</a></footer>
+</body>
+</html>
