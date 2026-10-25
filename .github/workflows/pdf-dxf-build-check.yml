@@ -19,6 +19,20 @@ jobs:
           node-version: 22
       - name: Clone converter source
         run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
+      - name: Diagnose PDF.js constructPath argument shape
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('converter-src/src/core/converter.ts')
+          s = p.read_text()
+          old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
+          new = '''          const rawArgs = argsArray[i];
+          console.log("constructPath diagnostic", JSON.stringify({ kind: typeof rawArgs, array: Array.isArray(rawArgs), args: rawArgs }));
+          const [subOps, coords] = rawArgs as [number[], number[]];'''
+          if old not in s:
+              raise SystemExit('Could not locate constructPath argument line')
+          p.write_text(s.replace(old, new))
+          PY
       - name: Build converter library from source
         working-directory: converter-src
         run: |
