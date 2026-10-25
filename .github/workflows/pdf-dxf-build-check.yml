@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 22
       - name: Install converter build dependencies
-        run: npm install --no-save --no-package-lock vite@6 pdf-to-dxf@1.2.0
+        run: npm install --no-save --no-package-lock vite@6 @ek-mc/pdf-to-dxf@1.2.0
       - name: Build local converter bundle
         run: |
           mkdir -p vendor
