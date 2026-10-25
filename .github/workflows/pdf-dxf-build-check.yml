@@ -28,7 +28,7 @@ jobs:
           pnpm test
           test -s dist/pdf-to-dxf.mjs
       - name: Install site bundler
-        run: npm install --no-save --no-package-lock vite@8
+        run: npm install --no-save --no-package-lock vite@8 playwright
       - name: Build local converter bundle
         run: |
           mkdir -p vendor
@@ -41,3 +41,15 @@ jobs:
           grep -q 'id="pdf-file"' index.html
           grep -q 'id="pdf-convert-button"' index.html
           grep -q 'src="vendor/pdf-to-dxf.bundle.js"' index.html
+
+      - name: Install Chromium for browser smoke test
+        run: npx playwright install --with-deps chromium
+      - name: Run local browser conversion smoke test
+        run: |
+          npx vite --host 127.0.0.1 --port 4173 > /tmp/paid-vite.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+          node tests/pdf-dxf-browser-smoke.mjs
