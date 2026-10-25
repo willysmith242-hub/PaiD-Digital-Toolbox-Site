@@ -1,3 +1,3 @@
-import { convertPdfToDxf } from "pdf-to-dxf";
+import { convertPdfToDxf } from "../converter-src/src/core/converter.ts";
 
 window.PaiDPdfToDxf = { convertPdfToDxf };
