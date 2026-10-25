@@ -23,6 +23,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install local PDF-to-DXF build dependencies
+        run: npm install --no-save --no-package-lock vite@6 pdf-to-dxf@1.2.0
+      - name: Build local PDF-to-DXF engine
+        run: |
+          mkdir -p vendor
+          npx vite build --config vite.pdfdxf.config.js
+          test -s vendor/pdf-to-dxf.bundle.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website files
