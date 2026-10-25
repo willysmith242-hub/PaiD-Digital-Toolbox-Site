@@ -19,16 +19,18 @@ jobs:
           node-version: 22
       - name: Clone converter source
         run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
-      - name: Diagnose PDF.js constructPath argument shape
+      - name: Normalize PDF.js constructPath arguments
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('converter-src/src/core/converter.ts')
           s = p.read_text()
           old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
-          new = '''          const rawArgs = argsArray[i];
-          console.log("constructPath diagnostic", JSON.stringify({ kind: typeof rawArgs, array: Array.isArray(rawArgs), args: rawArgs }));
-          const [subOps, coords] = rawArgs as [number[], number[]];'''
+          new = """          const rawArgs = argsArray[i] as unknown[];
+          // Newer PDF.js versions prefix constructPath arguments with a numeric path ID.
+          const [subOps, coords] = (typeof rawArgs[0] === 'number' && rawArgs.length >= 3
+            ? [rawArgs[1], rawArgs[2]]
+            : [rawArgs[0], rawArgs[1]]) as [number[], number[]];"""
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
           p.write_text(s.replace(old, new))
