@@ -26,7 +26,9 @@ const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ acceptDownloads: true });
   const errors = [];
+  const pathDiagnostics = [];
   page.on("pageerror", e => errors.push(e.message));
+  page.on("console", msg => { if (msg.text().includes("constructPath diagnostic")) pathDiagnostics.push(msg.text().slice(0, 2000)); });
   await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
   await page.locator("#pdf-file").setInputFiles({
     name: "paid-vector-smoke-test.pdf",
@@ -49,7 +51,7 @@ try {
   const fs = await import("node:fs/promises");
   const dxf = await fs.readFile(path, "utf8");
   for (const token of ["SECTION", "ENTITIES", "LINE", "TEXT"]) {
-    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token + "; UI status: " + status + "; DXF preview: " + dxf.slice(0, 5000));
+    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token + "; UI status: " + status + "; path diagnostics: " + pathDiagnostics.join(" | ") + "; DXF preview: " + dxf.slice(0, 5000));
   }
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
   console.log("Browser smoke conversion succeeded: " + status);
