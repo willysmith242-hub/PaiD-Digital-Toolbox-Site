@@ -34,8 +34,9 @@ jobs:
           mkdir -p vendor
           npx vite build --config vite.pdfdxf.config.js
           test -s vendor/pdf-to-dxf.bundle.js
-          find vendor -maxdepth 1 -type f -printf "%f\\n"
+          cp converter-src/node_modules/.pnpm/pdfjs-dist@*/node_modules/pdfjs-dist/build/pdf.worker.min.mjs vendor/pdf-worker-pdf.worker.min.mjs
           test -s vendor/pdf-worker-pdf.worker.min.mjs
+          find vendor -maxdepth 1 -type f -printf "%f\\n"
           grep -q "convertPdfToDxf" src/pdf-to-dxf-entry.js
           grep -q 'id="pdf-file"' index.html
           grep -q 'id="pdf-convert-button"' index.html
