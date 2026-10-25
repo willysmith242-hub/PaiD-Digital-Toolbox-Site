@@ -33,7 +33,7 @@ try {
     mimeType: "application/pdf",
     buffer: makeVectorPdf()
   });
-  const downloadPromise = page.waitForEvent("download", { timeout: 30000 });
+  const downloadPromise = page.waitForEvent("download", { timeout: 30000 }).catch(() => null);
   await page.locator("#pdf-convert-button").click();
   await page.waitForFunction(() => {
     const text = document.querySelector("#pdf-converter-status")?.textContent || "";
@@ -44,6 +44,7 @@ try {
     throw new Error("Browser conversion did not succeed. UI status: " + status + (errors.length ? "; browser errors: " + errors.join("; ") : ""));
   }
   const download = await downloadPromise;
+  if (!download) throw new Error("Conversion reported success but no file download event was observed.");
   const path = await download.path();
   const fs = await import("node:fs/promises");
   const dxf = await fs.readFile(path, "utf8");
