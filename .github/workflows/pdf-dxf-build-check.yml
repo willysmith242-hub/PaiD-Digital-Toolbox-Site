@@ -35,7 +35,9 @@ jobs:
             }
             return [];
           };
-          const offset = typeof rawArgs[0] === 'number' && rawArgs.length >= 3 ? 1 : 0;
+          const firstArg = toNumericArray(rawArgs[0]);
+          // Some PDF.js builds wrap the path id in a one-item array.
+          const offset = rawArgs.length >= 3 && firstArg.length === 1 ? 1 : 0;
           const subOps = toNumericArray(rawArgs[offset]);
           const coords = toNumericArray(rawArgs[offset + 1]);
           processConstructPath(subOps, coords, writer, opts.scale);"""
