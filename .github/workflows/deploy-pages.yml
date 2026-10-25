@@ -35,6 +35,7 @@ jobs:
           corepack enable
           pnpm install --no-frozen-lockfile
           pnpm run build:lib
+          pnpm test
           test -s dist/pdf-to-dxf.mjs
       - name: Install site bundler
         run: npm install --no-save --no-package-lock vite@8
@@ -43,6 +44,8 @@ jobs:
           mkdir -p vendor
           npx vite build --config vite.pdfdxf.config.js
           test -s vendor/pdf-to-dxf.bundle.js
+          find vendor -maxdepth 1 -type f -printf "%f\\n"
+          test -s vendor/pdf-worker-pdf.worker.min.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website files
