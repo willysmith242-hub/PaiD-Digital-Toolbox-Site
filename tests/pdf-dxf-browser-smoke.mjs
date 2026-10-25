@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 function makeVectorPdf() {
-  const stream = "0 0 m 100 0 l 100 100 l 0 100 l h S\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\n";
+  const stream = "0 0 100 100 re S\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\n";
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
