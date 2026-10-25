@@ -7,8 +7,7 @@ export default defineConfig({
     emptyOutDir: false,
     lib: {
       entry: "src/pdf-to-dxf-entry.js",
-      formats: ["iife"],
-      name: "PaiDPdfToDxfBundle",
+      formats: ["es"],
       fileName: () => "pdf-to-dxf.bundle.js"
     },
     rollupOptions: {
