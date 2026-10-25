@@ -1,0 +1,30 @@
+name: PDF-to-DXF build check
+
+on:
+  push:
+    branches: ["feature/pdf-dxf-engine"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install converter build dependencies
+        run: npm install --no-save --no-package-lock vite@6 pdf-to-dxf@1.2.0
+      - name: Build local converter bundle
+        run: |
+          mkdir -p vendor
+          npx vite build --config vite.pdfdxf.config.js
+          test -s vendor/pdf-to-dxf.bundle.js
+          grep -q "convertPdfToDxf" src/pdf-to-dxf-entry.js
+          grep -q 'id="pdf-file"' index.html
+          grep -q 'id="pdf-convert-button"' index.html
+          grep -q 'src="vendor/pdf-to-dxf.bundle.js"' index.html
