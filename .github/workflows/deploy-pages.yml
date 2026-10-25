@@ -28,9 +28,9 @@ jobs:
         with:
           node-version: 22
       - name: Clone converter source
-        run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git /tmp/pdf-to-dxf
+        run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
       - name: Build converter library from source
-        working-directory: /tmp/pdf-to-dxf
+        working-directory: converter-src
         run: |
           npm install
           npm run build:lib
