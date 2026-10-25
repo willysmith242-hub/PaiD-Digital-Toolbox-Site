@@ -49,7 +49,7 @@ try {
   const fs = await import("node:fs/promises");
   const dxf = await fs.readFile(path, "utf8");
   for (const token of ["SECTION", "ENTITIES", "LINE", "TEXT"]) {
-    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token);
+    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token + "; DXF preview: " + dxf.slice(0, 5000));
   }
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
   console.log("Browser smoke conversion succeeded: " + status);
