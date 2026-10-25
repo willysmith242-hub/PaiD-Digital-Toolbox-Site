@@ -27,13 +27,25 @@ jobs:
           s = p.read_text()
           old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
           new = """          const rawArgs = argsArray[i] as unknown[];
-          // Newer PDF.js versions prefix constructPath arguments with a numeric path ID.
-          const [subOps, coords] = (typeof rawArgs[0] === 'number' && rawArgs.length >= 3
-            ? [rawArgs[1], rawArgs[2]]
-            : [rawArgs[0], rawArgs[1]]) as [number[], number[]];"""
+          // PDF.js may serialize path arrays as numeric-key objects across worker boundaries.
+          const toNumericArray = (value: unknown): number[] => {
+            if (Array.isArray(value) || ArrayBuffer.isView(value)) return Array.from(value as ArrayLike<number>);
+            if (value && typeof value === 'object') {
+              return Object.keys(value).sort((a, b) => Number(a) - Number(b)).map((key) => Number((value as Record<string, unknown>)[key]));
+            }
+            return [];
+          };
+          const offset = typeof rawArgs[0] === 'number' && rawArgs.length >= 3 ? 1 : 0;
+          const subOps = toNumericArray(rawArgs[offset]);
+          const coords = toNumericArray(rawArgs[offset + 1]);
+          processConstructPath(subOps, coords, writer, opts.scale);"""
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
-          p.write_text(s.replace(old, new))
+          # Replace the extraction and following call as one block.
+          old_block = old + '\\n          processConstructPath(subOps, coords, writer, opts.scale);'
+          if old_block not in s:
+              raise SystemExit('Could not locate constructPath extraction block')
+          p.write_text(s.replace(old_block, new))
           PY
       - name: Build converter library from source
         working-directory: converter-src
