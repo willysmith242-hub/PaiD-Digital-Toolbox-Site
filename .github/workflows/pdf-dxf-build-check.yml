@@ -35,11 +35,19 @@ jobs:
             }
             return [];
           };
-          const firstArg = toNumericArray(rawArgs[0]);
-          // Some PDF.js builds wrap the path id in a one-item array.
-          const offset = rawArgs.length >= 3 && firstArg.length === 1 ? 1 : 0;
-          const subOps = toNumericArray(rawArgs[offset]);
-          const coords = toNumericArray(rawArgs[offset + 1]);
+          // PDF.js operator arguments may be an array or a numeric-key object.
+          const argKeys = rawArgs && typeof rawArgs === 'object'
+            ? Object.keys(rawArgs).sort((a, b) => Number(a) - Number(b))
+            : [];
+          const argCount = Array.isArray(rawArgs) ? rawArgs.length : argKeys.length;
+          const firstArg = toNumericArray((rawArgs as Record<string, unknown>)[0]);
+          // A 3-argument shape is [pathId, subOps, coords]; a 2-argument shape is [subOps, coords].
+          const offset = argCount >= 3 ? 1 : 0;
+          const subOps = toNumericArray((rawArgs as Record<string, unknown>)[offset]);
+          const coords = toNumericArray((rawArgs as Record<string, unknown>)[offset + 1]);
+          if (!subOps.some((op) => op >= 13 && op <= 19)) {
+            console.warn('constructPath diagnostic', JSON.stringify({ argKeys, argCount, firstArg, subOps: subOps.slice(0, 20), coords: coords.slice(0, 20) }));
+          }
           processConstructPath(subOps, coords, writer, opts.scale);"""
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
