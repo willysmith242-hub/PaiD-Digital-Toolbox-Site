@@ -17,8 +17,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install converter build dependencies
-        run: npm install --no-save --no-package-lock vite@6 @ek-mc/pdf-to-dxf@1.2.0
+      - name: Clone converter source
+        run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git /tmp/pdf-to-dxf
+      - name: Build converter library from source
+        working-directory: /tmp/pdf-to-dxf
+        run: |
+          npm install
+          npm run build:lib
+          test -s dist/pdf-to-dxf.mjs
+      - name: Install site bundler
+        run: npm install --no-save --no-package-lock vite@8
       - name: Build local converter bundle
         run: |
           mkdir -p vendor
