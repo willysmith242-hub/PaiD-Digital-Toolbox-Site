@@ -33,12 +33,23 @@ try {
     mimeType: "application/pdf",
     buffer: makeVectorPdf()
   });
+  const downloadPromise = page.waitForEvent("download", { timeout: 30000 });
   await page.locator("#pdf-convert-button").click();
-  await page.getByText(/DXF download started\./).waitFor({ timeout: 30000 });
-  const downloadPromise = page.waitForEvent("download");
-  // Conversion may already have triggered; use status plus download event where available.
+  await page.waitForFunction(() => {
+    const text = document.querySelector("#pdf-converter-status")?.textContent || "";
+    return text.includes("DXF download started") || text.includes("Conversion failed") || text.includes("did not load");
+  }, { timeout: 30000 });
   const status = await page.locator("#pdf-converter-status").innerText();
-  if (!status.includes("DXF download started")) throw new Error("Conversion status did not report success: " + status);
+  if (!status.includes("DXF download started")) {
+    throw new Error("Browser conversion did not succeed. UI status: " + status + (errors.length ? "; browser errors: " + errors.join("; ") : ""));
+  }
+  const download = await downloadPromise;
+  const path = await download.path();
+  const fs = await import("node:fs/promises");
+  const dxf = await fs.readFile(path, "utf8");
+  for (const token of ["SECTION", "ENTITIES", "LINE", "TEXT"]) {
+    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token);
+  }
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
   console.log("Browser smoke conversion succeeded: " + status);
 } finally {
