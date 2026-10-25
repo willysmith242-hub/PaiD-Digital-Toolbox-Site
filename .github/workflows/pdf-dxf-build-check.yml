@@ -42,7 +42,7 @@ jobs:
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
           # Replace the extraction and following call as one block.
-          old_block = old + '\\n          processConstructPath(subOps, coords, writer, opts.scale);'
+          old_block = old + '\n          processConstructPath(subOps, coords, writer, opts.scale);'
           if old_block not in s:
               raise SystemExit('Could not locate constructPath extraction block')
           p.write_text(s.replace(old_block, new))
