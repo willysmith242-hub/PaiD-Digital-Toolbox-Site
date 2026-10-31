@@ -47,7 +47,7 @@ jobs:
           let coords = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset + 1]);
           // PDF.js 5 may pack path op IDs 0..4 and their coordinates in one buffer.
           // Older PDF.js operator lists use OPS IDs 13..19 with a separate coordinate array.
-          if (subOps.length && subOps.every((op) => op >= 0 && op <= 4)) {
+          if (subOps.length && subOps[0] >= 0 && subOps[0] <= 4) {
             const packed = subOps;
             const normalizedOps: number[] = [];
             const normalizedCoords: number[] = [];
