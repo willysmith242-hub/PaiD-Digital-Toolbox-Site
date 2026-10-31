@@ -40,11 +40,11 @@ jobs:
             ? Object.keys(rawArgs).sort((a, b) => Number(a) - Number(b))
             : [];
           const argCount = Array.isArray(rawArgs) ? rawArgs.length : argKeys.length;
-          const firstArg = toNumericArray((rawArgs as Record<string, unknown>)[0]);
+          const firstArg = toNumericArray((rawArgs as unknown as Record<string, unknown>)[0]);
           // A 3-argument shape is [pathId, subOps, coords]; a 2-argument shape is [subOps, coords].
           const offset = argCount >= 3 ? 1 : 0;
-          const subOps = toNumericArray((rawArgs as Record<string, unknown>)[offset]);
-          const coords = toNumericArray((rawArgs as Record<string, unknown>)[offset + 1]);
+          const subOps = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset]);
+          const coords = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset + 1]);
           if (!subOps.some((op) => op >= 13 && op <= 19)) {
             console.warn('constructPath diagnostic', JSON.stringify({ argKeys, argCount, firstArg, subOps: subOps.slice(0, 20), coords: coords.slice(0, 20) }));
           }
