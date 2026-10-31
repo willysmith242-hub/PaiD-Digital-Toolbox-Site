@@ -23,6 +23,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Clone converter source
+        run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
+      - name: Build converter library from source
+        working-directory: converter-src
+        run: |
+          corepack enable
+          pnpm install --no-frozen-lockfile
+          pnpm run build:lib
+          pnpm test
+          test -s dist/pdf-to-dxf.mjs
+      - name: Install site bundler
+        run: npm install --no-save --no-package-lock vite@8
+      - name: Build local PDF-to-DXF engine
+        run: |
+          mkdir -p vendor
+          npx vite build --config vite.pdfdxf.config.js
+          test -s vendor/pdf-to-dxf.bundle.js
+          cp converter-src/node_modules/.pnpm/pdfjs-dist@*/node_modules/pdfjs-dist/build/pdf.worker.min.mjs vendor/pdf-worker-pdf.worker.min.mjs
+          test -s vendor/pdf-worker-pdf.worker.min.mjs
+          find vendor -maxdepth 1 -type f -printf "%f\\n"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload website files
