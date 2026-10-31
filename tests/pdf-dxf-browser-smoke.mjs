@@ -53,10 +53,10 @@ try {
   const fs = await import("node:fs/promises");
   const dxf = await fs.readFile(path, "utf8");
   if (!dxf.includes("SECTION") || !dxf.includes("ENTITIES")) throw new Error("Downloaded file is not a recognizable DXF; preview: " + dxf.slice(0, 2000));
-  const entityStart = dxf.search(/(?:^|\\r?\\n)2\\r?\\nENTITIES\\r?\\n/);
+  const entityStart = dxf.search(/(?:^|\r?\n)2\r?\nENTITIES\r?\n/);
   const entities = entityStart >= 0 ? dxf.slice(entityStart).split(/ENDSEC/)[0] : "";
-  const lineCount = (entities.match(/(?:^|\\r?\\n)0\\r?\\nLINE\\r?\\n/g) || []).length;
-  const textCount = (entities.match(/(?:^|\\r?\\n)0\\r?\\nTEXT\\r?\\n/g) || []).length;
+  const lineCount = (entities.match(/(?:^|\r?\n)0\r?\nLINE\r?\n/g) || []).length;
+  const textCount = (entities.match(/(?:^|\r?\n)0\r?\nTEXT\r?\n/g) || []).length;
   if (lineCount < 4) throw new Error("Expected at least 4 LINE entities for the PDF rectangle, found " + lineCount + "; entities preview: " + entities.slice(0, 3000));
   if (textCount < 1) throw new Error("Expected a TEXT entity from the PDF label, found " + textCount + "; entities preview: " + entities.slice(0, 3000));
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
