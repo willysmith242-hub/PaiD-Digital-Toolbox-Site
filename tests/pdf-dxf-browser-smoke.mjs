@@ -24,12 +24,14 @@ function makeVectorPdf() {
 
 const browser = await chromium.launch({ headless: true });
 try {
-  const page = await browser.newPage({ acceptDownloads: true });
+  const page = await browser.newPage({ acceptDownloads: true, viewport: { width: 390, height: 844 } });
   const errors = [];
-  const pathDiagnostics = [];
   page.on("pageerror", e => errors.push(e.message));
-  page.on("console", msg => { if (msg.text().includes("constructPath diagnostic")) pathDiagnostics.push(msg.text().slice(0, 2000)); });
   await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
+  const layout = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: window.innerWidth }));
+  if (layout.width > layout.viewport + 1) throw new Error("Mobile layout overflows horizontally: " + JSON.stringify(layout));
+  await page.locator("#pdf-file").waitFor({ state: "visible" });
+  await page.locator("#pdf-convert-button").waitFor({ state: "visible" });
   await page.locator("#pdf-file").setInputFiles({
     name: "paid-vector-smoke-test.pdf",
     mimeType: "application/pdf",
@@ -50,11 +52,14 @@ try {
   const path = await download.path();
   const fs = await import("node:fs/promises");
   const dxf = await fs.readFile(path, "utf8");
-  for (const token of ["SECTION", "ENTITIES", "LINE", "TEXT"]) {
-    if (!dxf.includes(token)) throw new Error("Downloaded DXF is missing expected token: " + token + "; UI status: " + status + "; path diagnostics: " + pathDiagnostics.join(" | ") + "; DXF preview: " + dxf.slice(0, 5000));
-  }
+  if (!dxf.includes("SECTION") || !dxf.includes("ENTITIES")) throw new Error("Downloaded file is not a recognizable DXF; preview: " + dxf.slice(0, 2000));
+  const entities = dxf.split("ENTITIES")[1]?.split("ENDSEC")[0] || "";
+  const lineCount = (entities.match(/0\\nLINE\\n/g) || []).length;
+  const textCount = (entities.match(/0\\nTEXT\\n/g) || []).length;
+  if (lineCount < 4) throw new Error("Expected at least 4 LINE entities for the PDF rectangle, found " + lineCount + "; entities preview: " + entities.slice(0, 3000));
+  if (textCount < 1) throw new Error("Expected a TEXT entity from the PDF label, found " + textCount + "; entities preview: " + entities.slice(0, 3000));
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
-  console.log("Browser smoke conversion succeeded: " + status);
+  console.log("Mobile browser conversion succeeded with " + lineCount + " LINE and " + textCount + " TEXT entities. " + status);
 } finally {
   await browser.close();
 }
