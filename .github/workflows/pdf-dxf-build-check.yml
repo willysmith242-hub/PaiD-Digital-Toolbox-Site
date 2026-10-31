@@ -68,7 +68,6 @@ jobs:
           } else if (!subOps.length || subOps.some((op) => !Number.isFinite(op))) {
             throw new Error('Unsupported PDF.js constructPath argument layout');
           }
-          console.warn('constructPath diagnostic', JSON.stringify({ ops: subOps.slice(0, 20), coordinateCount: coords.length }));
           processConstructPath(subOps, coords, writer, opts.scale);"""
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
