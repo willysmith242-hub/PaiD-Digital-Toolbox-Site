@@ -27,42 +27,52 @@ jobs:
           s = p.read_text()
           old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
           new = """          const rawArgs = argsArray[i] as unknown[];
-          console.warn('constructPath diagnostic', JSON.stringify({ rawType: typeof rawArgs, isArray: Array.isArray(rawArgs), keys: rawArgs && typeof rawArgs === 'object' ? Object.keys(rawArgs).slice(0, 12) : [], rawPreview: rawArgs && typeof rawArgs === 'object' ? Object.keys(rawArgs).slice(0, 4).map(k => { const v = (rawArgs as unknown as Record<string, unknown>)[k]; return { key: k, type: typeof v, array: Array.isArray(v), view: ArrayBuffer.isView(v), preview: v && typeof v === 'object' ? Object.keys(v).slice(0, 12) : v }; }) : rawArgs }));
+          // PDF.js 5.x supplies [paintOperator, [Float32Array(packedPath)], bounds].
+          // Older versions may supply [subOps, coords]. Normalize both layouts.
           const toNumericArray = (value: unknown): number[] => {
-            if (Array.isArray(value)) return value.map(Number);
             if (ArrayBuffer.isView(value)) return Array.from(value as unknown as ArrayLike<number>, Number);
+            if (Array.isArray(value)) {
+              return value.flatMap((item) => ArrayBuffer.isView(item)
+                ? Array.from(item as unknown as ArrayLike<number>, Number)
+                : Array.isArray(item) ? item.map(Number) : [Number(item)]);
+            }
             if (value && typeof value === 'object') {
               return Object.keys(value).sort((a, b) => Number(a) - Number(b)).map((key) => Number((value as Record<string, unknown>)[key]));
             }
             return [];
           };
-          const argKeys = rawArgs && typeof rawArgs === 'object'
-            ? Object.keys(rawArgs).sort((a, b) => Number(a) - Number(b))
-            : [];
-          const argCount = Array.isArray(rawArgs) ? rawArgs.length : argKeys.length;
-          // PDF.js variants may expose [pathId, packedPath, rectangleArgs] or [subOps, coords].
+          const argCount = Array.isArray(rawArgs) ? rawArgs.length : 0;
           const offset = argCount >= 3 ? 1 : 0;
           let subOps = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset]);
           let coords = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset + 1]);
-          // Newer PDF.js path payloads pack op codes and their coordinates into one array.
-          // The observed packed form uses 0=moveTo, 1=lineTo, 2=curveTo, 3=curveTo2, 4=closePath.
-          if (!subOps.some((op) => op >= 13 && op <= 19)) {
+          // PDF.js 5 packs each path op and its coordinate values into one Float32Array.
+          // Operator IDs are PDF.js OPS: moveTo=13, lineTo=14, curveTo=15,
+          // curveTo2=16, curveTo3=17, closePath=18, rectangle=19.
+          if (subOps.some((op) => op >= 13 && op <= 19)) {
             const packed = subOps;
             const normalizedOps: number[] = [];
             const normalizedCoords: number[] = [];
             let cursor = 0;
             while (cursor < packed.length) {
               const op = packed[cursor++];
-              const arity = op === 0 || op === 1 ? 2 : op === 2 ? 6 : op === 3 ? 4 : op === 4 ? 0 : -1;
+              const arity = op === 13 || op === 14 ? 2
+                : op === 15 ? 6
+                : op === 16 ? 4
+                : op === 17 ? 2
+                : op === 18 ? 0
+                : op === 19 ? 4 : -1;
               if (arity < 0 || cursor + arity > packed.length) {
                 throw new Error('Unsupported packed PDF.js path operator: ' + op);
               }
-              normalizedOps.push(op === 0 ? 13 : op === 1 ? 14 : op === 2 ? 15 : op === 3 ? 16 : 18);
+              normalizedOps.push(op);
               for (let j = 0; j < arity; j++) normalizedCoords.push(packed[cursor++]);
             }
             subOps = normalizedOps;
             coords = normalizedCoords;
+          } else if (!subOps.length || subOps.some((op) => !Number.isFinite(op))) {
+            throw new Error('Unsupported PDF.js constructPath argument layout');
           }
+          console.warn('constructPath diagnostic', JSON.stringify({ ops: subOps.slice(0, 20), coordinateCount: coords.length }));
           processConstructPath(subOps, coords, writer, opts.scale);"""
           if old not in s:
               raise SystemExit('Could not locate constructPath argument line')
