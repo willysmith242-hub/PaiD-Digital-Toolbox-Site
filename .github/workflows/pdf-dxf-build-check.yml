@@ -27,6 +27,7 @@ jobs:
           s = p.read_text()
           old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
           new = """          const rawArgs = argsArray[i] as unknown[];
+          console.warn('constructPath diagnostic', JSON.stringify({ rawType: typeof rawArgs, isArray: Array.isArray(rawArgs), keys: rawArgs && typeof rawArgs === 'object' ? Object.keys(rawArgs).slice(0, 12) : [], rawPreview: rawArgs && typeof rawArgs === 'object' ? Object.keys(rawArgs).slice(0, 4).map(k => { const v = (rawArgs as unknown as Record<string, unknown>)[k]; return { key: k, type: typeof v, array: Array.isArray(v), view: ArrayBuffer.isView(v), preview: v && typeof v === 'object' ? Object.keys(v).slice(0, 12) : v }; }) : rawArgs }));
           const toNumericArray = (value: unknown): number[] => {
             if (Array.isArray(value)) return value.map(Number);
             if (ArrayBuffer.isView(value)) return Array.from(value as unknown as ArrayLike<number>, Number);
