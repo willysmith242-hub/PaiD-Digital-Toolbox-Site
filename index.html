@@ -9,7 +9,9 @@
   <meta name="description" content="PaiD Digital Toolbox — free practical tools and trusted resources for everyday work, engineering, CAD and productivity.">
   <title>PaiD Digital Toolbox — Free tools for real work</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="module" src="vendor/pdf-to-dxf.bundle.js"></script>
   <script src="app.js" defer></script>
+  <script src="pdf-to-dxf-ui.js" defer></script>
   
 </head>
 <body>
@@ -117,12 +119,26 @@
 
     <section class="converter-section" id="pdf-converter">
       <div class="section-heading">
-        <div><p class="eyebrow">COMING BACK AFTER VERIFICATION</p><h2>PDF to DXF converter</h2></div>
-        <p>This feature is being prepared for the public website. The conversion engine is not included in this copy yet, so conversion is temporarily unavailable.</p>
+        <div><p class="eyebrow">LOCAL BETA — VERIFY OUTPUT</p><h2>PDF to DXF converter</h2></div>
+        <p>Convert vector PDF drawings into an editable DXF file in your browser. Your selected file is processed locally and is not uploaded to PaiD servers.</p>
       </div>
       <div class="converter-card">
-        <p><strong>What to know:</strong> Vector PDFs may be convertible to DXF; scanned/image-only PDFs usually need a different process. DXF is not the same as native DWG.</p>
-        <p>Never use converted drawings for fabrication, construction, or safety-critical work without checking scale, dimensions and geometry in CAD.</p>
+        <label class="upload-zone" for="pdf-file">
+          <span class="upload-symbol" aria-hidden="true">↑</span>
+          <strong>Choose a PDF drawing</strong>
+          <span>PDF files only · Start with a small vector drawing</span>
+        </label>
+        <input class="visually-hidden" id="pdf-file" type="file" accept="application/pdf,.pdf">
+        <div class="converter-actions">
+          <label class="checkbox-label"><input id="pdf-include-text" type="checkbox" checked> Include text where available</label>
+          <button class="primary-button" id="pdf-convert-button" type="button" disabled>Convert and download DXF</button>
+        </div>
+        <p class="converter-status" id="pdf-converter-status" data-state="info" role="status" aria-live="polite">Choose a PDF drawing to begin. Conversion requires the local engine to load successfully.</p>
+        <div class="converter-notes">
+          <p><strong>Important:</strong> This beta extracts vector paths and text; scanned/image-only PDFs may not produce editable geometry.</p>
+          <p>The output coordinates are based on PDF points unless scaled separately. Confirm units, scale, dimensions, text and geometry in CAD before use. Do not use unverified output for fabrication, construction or safety-critical work.</p>
+          <p>DXF is not the same as native DWG. Open the DXF in compatible CAD software and save/export to DWG only if your CAD application supports it.</p>
+        </div>
       </div>
     </section>
 

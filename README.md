@@ -10,9 +10,12 @@ This repository contains the public website version of PaiD Digital Toolbox. The
 - Unit converter and percentage calculator
 - Offline guide and software library
 - Third-party resources linked to their official websites
+- PDF-to-DXF beta interface and a build step that bundles the converter locally
 
-## Important status note
-The original PDF-to-DXF engine bundle could not be retrieved through the current GitHub file connection. The PDF-to-DXF feature is therefore not advertised as working on this public copy until the engine can be safely added and tested. Never rely on a converter output for engineering or safety-critical work without independent CAD checks.
+## PDF-to-DXF status
+The feature is being integrated on the separate `feature/pdf-dxf-engine` branch. The build workflow installs the open-source `pdf-to-dxf` package and bundles the engine and its PDF worker as local website assets. This is intended to avoid uploading selected drawings to a conversion service.
+
+A successful bundle build does **not** prove the converter works correctly in a browser or that the output is accurate. The converter is not considered verified until a real vector PDF is converted, the DXF opens in CAD, and scale/geometry are checked. Scanned/image-only PDFs may not contain extractable vector paths.
 
 ## Publish with GitHub Pages
 In this repository, open **Settings → Pages**, choose **Deploy from a branch**, select **main** and **/(root)**, then save. GitHub should display the published URL after deployment completes.

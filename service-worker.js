@@ -1,9 +1,12 @@
-const CACHE_NAME = "paid-toolbox-public-v1";
+const CACHE_NAME = "paid-toolbox-public-v2";
 const CORE_FILES = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./pdf-to-dxf-ui.js",
+  "./vendor/pdf-to-dxf.bundle.js",
+  "./vendor/pdf-worker-pdf.worker.min.mjs",
   "./manifest.webmanifest",
   "./paid-toolbox-icon.svg",
   "./offline.html",

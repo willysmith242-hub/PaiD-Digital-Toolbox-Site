@@ -1,0 +1,113 @@
+name: PDF-to-DXF build check
+
+on:
+  push:
+    branches: ["feature/pdf-dxf-engine"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Clone converter source
+        run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
+      - name: Normalize PDF.js constructPath arguments
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('converter-src/src/core/converter.ts')
+          s = p.read_text()
+          old = '          const [subOps, coords] = argsArray[i] as [number[], number[]];'
+          new = """          const rawArgs = argsArray[i] as unknown[];
+          // PDF.js 5.x supplies [paintOperator, [Float32Array(packedPath)], bounds].
+          // Older versions may supply [subOps, coords]. Normalize both layouts.
+          const toNumericArray = (value: unknown): number[] => {
+            if (ArrayBuffer.isView(value)) return Array.from(value as unknown as ArrayLike<number>, Number);
+            if (Array.isArray(value)) {
+              return value.flatMap((item) => ArrayBuffer.isView(item)
+                ? Array.from(item as unknown as ArrayLike<number>, Number)
+                : Array.isArray(item) ? item.map(Number) : [Number(item)]);
+            }
+            if (value && typeof value === 'object') {
+              return Object.keys(value).sort((a, b) => Number(a) - Number(b)).map((key) => Number((value as Record<string, unknown>)[key]));
+            }
+            return [];
+          };
+          const argCount = Array.isArray(rawArgs) ? rawArgs.length : 0;
+          const offset = argCount >= 3 ? 1 : 0;
+          let subOps = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset]);
+          let coords = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset + 1]);
+          // PDF.js 5 may pack path op IDs 0..4 and their coordinates in one buffer.
+          // Older PDF.js operator lists use OPS IDs 13..19 with a separate coordinate array.
+          if (subOps.length && subOps[0] >= 0 && subOps[0] <= 4) {
+            const packed = subOps;
+            const normalizedOps: number[] = [];
+            const normalizedCoords: number[] = [];
+            let cursor = 0;
+            while (cursor < packed.length) {
+              const op = packed[cursor++];
+              const arity = op === 0 || op === 1 ? 2 : op === 2 ? 6 : op === 3 ? 4 : op === 4 ? 0 : -1;
+              if (arity < 0 || cursor + arity > packed.length) {
+                throw new Error('Unsupported packed PDF.js path operator: ' + op);
+              }
+              normalizedOps.push(op === 0 ? 13 : op === 1 ? 14 : op === 2 ? 15 : op === 3 ? 16 : 18);
+              for (let j = 0; j < arity; j++) normalizedCoords.push(packed[cursor++]);
+            }
+            subOps = normalizedOps;
+            coords = normalizedCoords;
+          } else if (subOps.some((op) => op >= 13 && op <= 19)) {
+            // Already-separated operation codes and coordinates.
+          } else if (!subOps.length || subOps.some((op) => !Number.isFinite(op))) {
+            throw new Error('Unsupported PDF.js constructPath argument layout');
+          }
+          processConstructPath(subOps, coords, writer, opts.scale);"""
+          if old not in s:
+              raise SystemExit('Could not locate constructPath argument line')
+          # Replace the extraction and following call as one block.
+          old_block = old + '\n          processConstructPath(subOps, coords, writer, opts.scale);'
+          if old_block not in s:
+              raise SystemExit('Could not locate constructPath extraction block')
+          p.write_text(s.replace(old_block, new))
+          PY
+      - name: Build converter library from source
+        working-directory: converter-src
+        run: |
+          corepack enable
+          pnpm install --no-frozen-lockfile
+          pnpm run build:lib
+          pnpm test
+          test -s dist/pdf-to-dxf.mjs
+      - name: Install site bundler
+        run: npm install --no-save --no-package-lock vite@8 playwright
+      - name: Build local converter bundle
+        run: |
+          mkdir -p vendor
+          npx vite build --config vite.pdfdxf.config.js
+          test -s vendor/pdf-to-dxf.bundle.js
+          cp converter-src/node_modules/.pnpm/pdfjs-dist@*/node_modules/pdfjs-dist/build/pdf.worker.min.mjs vendor/pdf-worker-pdf.worker.min.mjs
+          test -s vendor/pdf-worker-pdf.worker.min.mjs
+          find vendor -maxdepth 1 -type f -printf "%f\\n"
+          grep -q "convertPdfToDxf" src/pdf-to-dxf-entry.js
+          grep -q 'id="pdf-file"' index.html
+          grep -q 'id="pdf-convert-button"' index.html
+          grep -q 'src="vendor/pdf-to-dxf.bundle.js"' index.html
+
+      - name: Install Chromium for browser smoke test
+        run: npx playwright install --with-deps chromium
+      - name: Run local browser conversion smoke test
+        run: |
+          npx vite --host 127.0.0.1 --port 4173 > /tmp/paid-vite.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+          node tests/pdf-dxf-browser-smoke.mjs
