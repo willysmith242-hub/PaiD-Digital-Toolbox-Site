@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-function makeVectorPdf() {
+function makeVectorPdf(stream = "0 0 100 100 re S\\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\\n") {
   const stream = "0 0 100 100 re S\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\n";
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
@@ -59,8 +59,23 @@ try {
   const textCount = (entities.match(/(?:^|\r?\n)0\r?\nTEXT\r?\n/g) || []).length;
   if (lineCount < 4) throw new Error("Expected at least 4 LINE entities for the PDF rectangle, found " + lineCount + "; entities preview: " + entities.slice(0, 3000));
   if (textCount < 1) throw new Error("Expected a TEXT entity from the PDF label, found " + textCount + "; entities preview: " + entities.slice(0, 3000));
+  // Exercise a second PDF containing a cubic Bezier curve, not just a rectangle.
+  await page.locator("#pdf-file").setInputFiles({ name: "paid-curve-smoke-test.pdf", mimeType: "application/pdf", buffer: makeVectorPdf("20 20 m 50 100 100 100 130 20 c S\\nBT /F1 12 Tf 20 120 Td (CURVE TEST) Tj ET\\n") });
+  const secondDownloadPromise = page.waitForEvent("download", { timeout: 30000 }).catch(() => null);
+  await page.locator("#pdf-convert-button").click();
+  await page.waitForFunction(() => { const s = document.querySelector("#pdf-converter-status")?.textContent || ""; return s.includes("DXF download started") || s.includes("Conversion failed") || s.includes("did not load"); }, { timeout: 30000 });
+  const secondStatus = await page.locator("#pdf-converter-status").innerText();
+  if (!secondStatus.includes("DXF download started")) throw new Error("Curve PDF conversion failed: " + secondStatus);
+  const secondDownload = await secondDownloadPromise;
+  if (!secondDownload) throw new Error("Curve PDF conversion reported success without a download.");
+  const secondPath = await secondDownload.path();
+  const curveDxf = await fs.readFile(secondPath, "utf8");
+  const curveStart = curveDxf.search(/(?:^|\r?\n)2\r?\nENTITIES\r?\n/);
+  const curveEntities = curveStart >= 0 ? curveDxf.slice(curveStart).split(/ENDSEC/)[0] : "";
+  const curveLineCount = (curveEntities.match(/(?:^|\r?\n)0\r?\nLINE\r?\n/g) || []).length;
+  if (curveLineCount < 1) throw new Error("Curve PDF produced no LINE geometry; entities: " + curveEntities.slice(0, 2000));
   if (errors.length) throw new Error("Browser errors: " + errors.join("; "));
-  console.log("Mobile browser conversion succeeded with " + lineCount + " LINE and " + textCount + " TEXT entities. " + status);
+  console.log("Mobile browser conversion succeeded: rectangle PDF emitted " + lineCount + " LINE and " + textCount + " TEXT entities; curve PDF emitted " + curveLineCount + " LINE entities.");
 } finally {
   await browser.close();
 }
