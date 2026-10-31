@@ -45,30 +45,26 @@ jobs:
           const offset = argCount >= 3 ? 1 : 0;
           let subOps = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset]);
           let coords = toNumericArray((rawArgs as unknown as Record<string, unknown>)[offset + 1]);
-          // PDF.js 5 packs each path op and its coordinate values into one Float32Array.
-          // Operator IDs are PDF.js OPS: moveTo=13, lineTo=14, curveTo=15,
-          // curveTo2=16, curveTo3=17, closePath=18, rectangle=19.
-          if (subOps.some((op) => op >= 13 && op <= 19)) {
+          // PDF.js 5 may pack path op IDs 0..4 and their coordinates in one buffer.
+          // Older PDF.js operator lists use OPS IDs 13..19 with a separate coordinate array.
+          if (subOps.length && subOps.every((op) => op >= 0 && op <= 4)) {
             const packed = subOps;
             const normalizedOps: number[] = [];
             const normalizedCoords: number[] = [];
             let cursor = 0;
             while (cursor < packed.length) {
               const op = packed[cursor++];
-              const arity = op === 13 || op === 14 ? 2
-                : op === 15 ? 6
-                : op === 16 ? 4
-                : op === 17 ? 2
-                : op === 18 ? 0
-                : op === 19 ? 4 : -1;
+              const arity = op === 0 || op === 1 ? 2 : op === 2 ? 6 : op === 3 ? 4 : op === 4 ? 0 : -1;
               if (arity < 0 || cursor + arity > packed.length) {
                 throw new Error('Unsupported packed PDF.js path operator: ' + op);
               }
-              normalizedOps.push(op);
+              normalizedOps.push(op === 0 ? 13 : op === 1 ? 14 : op === 2 ? 15 : op === 3 ? 16 : 18);
               for (let j = 0; j < arity; j++) normalizedCoords.push(packed[cursor++]);
             }
             subOps = normalizedOps;
             coords = normalizedCoords;
+          } else if (subOps.some((op) => op >= 13 && op <= 19)) {
+            // Already-separated operation codes and coordinates.
           } else if (!subOps.length || subOps.some((op) => !Number.isFinite(op))) {
             throw new Error('Unsupported PDF.js constructPath argument layout');
           }
