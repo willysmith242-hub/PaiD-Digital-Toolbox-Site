@@ -1,8 +1,12 @@
 import fs from "node:fs";
 const file = "converter-src/src/core/converter.ts";
-let source = fs.readFileSync(file, "utf8");
-const old = "            const packed = args[1] as ArrayLike<number> | undefined;\n            if (packed && typeof packed.length === \"number\") {\n              const { ops, coords } = unpackPath(packed);\n              processConstructPath(ops, coords, writer, opts.scale);\n            }";
-const replacement = "            // PDF.js 6 may nest the packed DrawOPS stream inside args[1].\n            const candidates: ArrayLike<number>[] = [];\n            const collect = (value: unknown, depth = 0): void => {\n              if (depth > 4 || value == null) return;\n              if (ArrayBuffer.isView(value) || (Array.isArray(value) && value.every((v) => typeof v === 'number'))) {\n                candidates.push(value as ArrayLike<number>);\n                return;\n              }\n              if (Array.isArray(value)) for (const item of value) collect(item, depth + 1);\n            };\n            collect(args[1]);\n            let decoded = false;\n            for (const packed of candidates) {\n              try {\n                const { ops, coords } = unpackPath(packed);\n                if (ops.length && coords.length) {\n                  processConstructPath(ops, coords, writer, opts.scale);\n                  decoded = true;\n                }\n              } catch { /* Try another nested candidate. */ }\n            }\n            if (!decoded) warnings.push(`Page ${pageIndex + 1}: no decodable packed vector path found in PDF.js constructPath operator.`);";
-if (source.includes(replacement)) { console.log("Nested PDF.js packed-path compatibility already applied."); }
-else if (source.includes(old)) { source = source.replace(old, replacement); fs.writeFileSync(file, source); console.log("Applied nested PDF.js packed-path compatibility."); }
-else { throw new Error("Could not safely locate the expected packed-path block."); }
+const source = fs.readFileSync(file, "utf8");
+const supported = "const packed = args[1]?.[0] as ArrayLike<number> | undefined;";
+const legacy = "const packed = args[1] as ArrayLike<number> | undefined;";
+if (source.includes(supported)) {
+  console.log("Upstream converter already contains the PDF.js 6 packed-path argument lookup; no patch required.");
+} else if (source.includes(legacy)) {
+  throw new Error("Unexpected legacy PDF.js path lookup. Refusing an unverified automatic patch.");
+} else {
+  throw new Error("Could not verify the upstream PDF.js constructPath implementation.");
+}
