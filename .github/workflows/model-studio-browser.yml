@@ -10,6 +10,8 @@ jobs:
   model-studio:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    env:
+      PAID_BASE_URL: https://willysmith242-hub.github.io/PaiD-Digital-Toolbox-Site/
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
