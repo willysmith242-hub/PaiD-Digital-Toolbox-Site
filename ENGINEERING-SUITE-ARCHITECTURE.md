@@ -121,3 +121,70 @@ Prefer a versioned JSON project document as the editable internal representation
 ## Current verified status
 
 The most recent CI run built the converter source and website bundle, but its browser smoke test failed: the output included TEXT but did not include the expected LINE geometry. Therefore the PDF-to-DXF engine is not yet verified as fixed. Do not advertise the full suite as implemented or fabrication-ready. The blueprint is a plan, not proof of completed features.
+
+
+## Universal AI modeller (planned module)
+
+The modeller is a general-purpose creation workspace, not a reboiler-only feature. It belongs in a dedicated **AI Modelling** tray and should support a growing catalogue of object families rather than imply that every possible object is already supported.
+
+### Input routes
+
+- Natural-language descriptions with explicit units and user-supplied dimensions.
+- Photographs of objects and hand sketches, with a calibration/reference dimension required before claiming real-world scale.
+- Engineering drawings and vector PDF imports, with raster/scanned pages treated as uncertain until calibrated.
+- Supported CAD/project files, preserving source units, layers and provenance where parsers permit.
+
+### Interpretation and clarification loop
+
+1. Classify the requested object and intended output (visual concept, editable model, drawing, or manufacturing documentation).
+2. Extract only dimensions that are explicit or reliably measurable from a calibrated source.
+3. Build a parameter checklist for required dimensions, units, tolerances, material and connection details.
+4. Ask focused questions for missing or conflicting values. Never silently fill in dimensions that affect fit, strength, pressure containment or fabrication.
+5. Show the user the interpreted inputs and assumptions for confirmation before generating the model.
+
+Image recognition may propose candidate geometry, but each inferred measurement must carry a confidence/uncertainty label. A photograph without a known scale can support a visual approximation, not a dimensionally accurate engineering model.
+
+### Internal model and geometry pipeline
+
+- Store each project as versioned JSON: stable object IDs, parameters, units, constraints, feature history, source references, revisions and validation results.
+- Keep a parametric feature graph as the editable source of truth; generate meshes, drawings and exports from it rather than treating a rendered mesh as the master model.
+- Separate input interpretation, constraint solving, geometry-kernel adapter, tessellation/rendering, drawing projection and export adapters.
+- Start with a browser-compatible 3D preview layer and a deliberately limited set of deterministic parametric primitives/features. Evaluate an open-source CAD kernel compiled to WebAssembly before selecting it; document browser, Android memory and licensing constraints and prove the chosen build with tests before promising kernel capabilities.
+- Use local deterministic geometry for supported operations. AI interpretation is a separate optional layer and must not be required to edit or regenerate an already-defined parametric model.
+
+### Outputs and format boundaries
+
+- Generate editable parametric project files and 2D orthographic views first.
+- Add DXF export only for entity types that have automated geometry and coordinate tests.
+- Add STL for validated mesh workflows; add STEP only after a supported CAD kernel and round-trip tests are in place.
+- DWG requires a lawful compatible SDK or a clearly documented conversion route. Do not label DXF as DWG or imply interchangeability.
+- Provide a preview and export manifest listing units, scale, supported features, warnings and engine version.
+
+### Offline and optional AI
+
+- Cache the application shell, documentation, local geometry engine and supported templates for offline use.
+- Keep modelling and export of already-supported parametric features local wherever feasible.
+- Treat photo interpretation, complex drawing understanding and conversational AI as optional capabilities. They may require a compatible on-device model or an explicitly selected online service; never claim they work offline until tested on target Android devices.
+- Show a clear capability indicator: **Offline local**, **On-device AI** or **Online AI required**. Do not send private drawings to a remote service without explicit user consent.
+
+### Coverage and safety
+
+Use extensible object-family templates (mechanical parts, piping, structural components, architecture/interiors, furniture, electrical enclosures and general objects) but show a family as supported only after its parameter schema, geometry operations, drawing outputs and tests exist. Do not imply universal coverage from a free-form text box.
+
+All generated geometry is a draft. The modeller must not infer structural adequacy, pressure ratings, electrical safety, code compliance, tolerances or fabrication approval from appearance alone. Safety-critical models require complete source data and review by a qualified professional. Keep visual concepts visibly distinct from dimensioned engineering deliverables.
+
+### Acceptance gates
+
+1. Text input creates a supported primitive/part with explicit dimensions and editable parameters.
+2. Missing mandatory dimensions trigger questions and block dimensioned export until answered.
+3. A calibrated sketch/photo can be converted to a test model with a stated uncertainty bound; uncalibrated images remain visual-only.
+4. Editing a parameter updates the model, drawings and BOM consistently.
+5. DXF/mesh exports pass entity, bounding-box, unit and round-trip tests for each supported feature.
+6. Offline tests prove which operations work with network disabled on documented target devices.
+7. Safety-critical outputs carry warnings and cannot be labelled approved or fabrication-ready by the software.
+
+This module is a design specification only. No universal AI model generation, photo-to-CAD or offline AI capability is currently claimed as implemented.
+
+## Tray-based product navigation
+
+All tools belong to a named tray. The current published tray groups are Engineering, Documents & PDF, CAD & design, and Productivity. Planned trays include AI Modelling and Software Library. Add a planned tray only when it contains a working module or clearly labelled non-interactive roadmap content; never create fake active tools or dead buttons.
