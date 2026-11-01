@@ -1,0 +1,41 @@
+name: Production PDF-to-DXF browser check
+
+on:
+  workflow_run:
+    workflows: ["Deploy PaiD Digital Toolbox Site to GitHub Pages"]
+    types: [completed]
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-smoke:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Wait for GitHub Pages deployment
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent https://willysmith242-hub.github.io/PaiD-Digital-Toolbox-Site/ > /tmp/paid-home.html; then
+              if grep -q 'id="pdf-convert-button"' /tmp/paid-home.html; then
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo "Deployed homepage or converter UI did not become available"
+          exit 1
+      - name: Test deployed mobile converter
+        env:
+          PAID_BASE_URL: https://willysmith242-hub.github.io/PaiD-Digital-Toolbox-Site/
+        run: node tests/pdf-dxf-browser-smoke.mjs
