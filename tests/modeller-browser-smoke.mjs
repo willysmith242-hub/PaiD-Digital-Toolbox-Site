@@ -26,10 +26,10 @@ try{
  const jsonDownload=await jsonDownloadPromise,jsonPath=await jsonDownload.path(),jsonText=await fs.readFile(jsonPath,"utf8"),project=JSON.parse(jsonText);
  if(project.parameters.unit!=="mm"||project.parameters.length!==150||project.parameters.width!==90||project.parameters.height!==40||project.editable!==true)throw new Error("Editable JSON export did not preserve parameters and units");
  if(!(await page.locator(".model-warning").innerText()).includes("does not store the model's units"))throw new Error("STL unit warning is missing");
- await page.locator("#shape").selectOption("cylinder");
+ const dxfPromise=page.waitForEvent("download");\n await page.locator("#export-dxf").click();\n const dxfDownload=await dxfPromise,dxfPath=await dxfDownload.path(),dxf=await fs.readFile(dxfPath,"utf8");\n const lineEntities=(dxf.match(/\\nLINE\\n/g)||[]).length;\n if(lineEntities!==12||!dxf.includes("TOP VIEW")||!dxf.includes("FRONT VIEW")||!dxf.includes("SIDE VIEW")||!dxf.includes("$INSUNITS"))throw new Error("Box 2D DXF projections or unit metadata invalid; LINE count="+lineEntities);\n await page.locator("#shape").selectOption("cylinder");
  if(await page.locator("#box-fields").isVisible())throw new Error("Box fields should be hidden for cylinder");
  await page.locator("#update-model").click();
- if(!await page.locator("#model-preview svg").count())throw new Error("Cylinder preview missing");
+ if(!await page.locator("#model-preview svg").count())throw new Error("Cylinder preview missing");\n const cylDxfPromise=page.waitForEvent("download");await page.locator("#export-dxf").click();const cylDownload=await cylDxfPromise,cylPath=await cylDownload.path(),cylDxf=await fs.readFile(cylPath,"utf8");if(!cylDxf.includes("CIRCLE")||(cylDxf.match(/\\nLINE\\n/g)||[]).length!==8)throw new Error("Cylinder DXF projections invalid");
  if(errors.length)throw new Error("Browser errors: "+errors.join("; "));
  console.log("Model Studio passed: mobile layout, missing-dimension prompt, parsed box dimensions, 12-facet STL export and cylinder preview.");
 }finally{await browser.close();}
