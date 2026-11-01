@@ -1,4 +1,4 @@
-const CACHE_NAME = "paid-toolbox-public-v3";
+const CACHE_NAME = "paid-toolbox-public-v4";
 const CORE_FILES = [
   "./",
   "./index.html",
@@ -11,7 +11,10 @@ const CORE_FILES = [
   "./paid-toolbox-icon.svg",
   "./offline.html",
   "./offline-guide.html",
-  "./software-library.html"
+  "./software-library.html",
+  "./modeller.html",
+  "./modeller.css",
+  "./modeller.js"
 ];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
