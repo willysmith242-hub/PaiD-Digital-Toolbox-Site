@@ -29,6 +29,8 @@ jobs:
           node-version: 22
       - name: Clone converter source
         run: git clone --depth 1 https://github.com/ek-mc/pdf-to-dxf.git converter-src
+      - name: Patch PDF.js 6 packed-path handling
+        run: node scripts/patch-pdf-to-dxf.mjs
       - name: Build converter library from source
         working-directory: converter-src
         run: |
