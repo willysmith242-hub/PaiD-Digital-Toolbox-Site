@@ -21,6 +21,11 @@ try{
  const download=await downloadPromise,path=await download.path(),fs=await import("node:fs/promises"),stl=await fs.readFile(path,"utf8");
  const facets=(stl.match(/facet normal/g)||[]).length;
  if(facets!==12||!stl.startsWith("solid paid_model"))throw new Error("Box STL mesh invalid; facets="+facets);
+ const jsonDownloadPromise=page.waitForEvent("download");
+ await page.locator("#export-json").click();
+ const jsonDownload=await jsonDownloadPromise,jsonPath=await jsonDownload.path(),jsonText=await fs.readFile(jsonPath,"utf8"),project=JSON.parse(jsonText);
+ if(project.parameters.unit!=="mm"||project.parameters.length!==150||project.parameters.width!==90||project.parameters.height!==40||project.editable!==true)throw new Error("Editable JSON export did not preserve parameters and units");
+ if(!(await page.locator(".model-warning").innerText()).includes("does not store the model's units"))throw new Error("STL unit warning is missing");
  await page.locator("#shape").selectOption("cylinder");
  if(await page.locator("#box-fields").isVisible())throw new Error("Box fields should be hidden for cylinder");
  await page.locator("#update-model").click();
