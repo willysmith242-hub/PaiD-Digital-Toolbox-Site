@@ -3,12 +3,12 @@
 This checklist distinguishes automated build checks from real user-facing tests. Do not mark a test as passed unless it was actually performed.
 
 ## Automated build checks
-- [ ] GitHub Actions successfully installs the pinned converter package and Vite.
-- [ ] The converter bundle builds and is non-empty.
-- [ ] The converter UI and local bundle references are present.
-- [ ] The built bundle loads the PDF.js worker from a local asset.
+- [x] GitHub Actions successfully installs the converter source and Vite (latest deployment run passed).
+- [x] The converter bundle builds and is non-empty (latest deployment run passed).
+- [x] The converter UI and local bundle references are present in `main`.
+- [x] The deployment build creates and includes the local PDF.js worker asset.
 
-## Manual tests — NOT YET VERIFIED
+## Production browser check\nA GitHub Actions workflow now runs the same mobile-sized PDF conversion smoke test against the deployed Pages URL after a successful deployment. It tests a synthetic vector PDF and checks that a DXF download contains expected entities. This still does not replace checking dimensions and scale in a CAD application.\n\n## Manual tests — NOT YET VERIFIED
 - [ ] A real browser successfully converts a known vector PDF.
 - [ ] The generated DXF opens in a CAD program and its geometry, dimensions, text and scale have been checked.
 - [ ] A scanned/image-only PDF fails clearly without producing a misleading result.
