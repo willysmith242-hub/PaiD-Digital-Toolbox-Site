@@ -1,0 +1,30 @@
+import { chromium } from "playwright";
+const browser=await chromium.launch({headless:true});
+try{
+ const page=await browser.newPage({acceptDownloads:true,viewport:{width:390,height:844}});
+ const errors=[];page.on("pageerror",e=>errors.push(e.message));
+ await page.goto(process.env.PAID_BASE_URL+"modeller.html",{waitUntil:"networkidle"});
+ await page.locator("#model-preview svg").waitFor();
+ const layout=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth}));
+ if(layout.width>layout.viewport+1)throw new Error("Model Studio mobile overflow: "+JSON.stringify(layout));
+ await page.locator("#description").fill("box 150 x 90 mm");
+ await page.locator("#interpret").click();
+ const question=await page.locator("#interpret-status").innerText();
+ if(!question.includes("needs length, width and height"))throw new Error("Missing dimension was not requested: "+question);
+ await page.locator("#description").fill("box 150 x 90 x 40 mm");
+ await page.locator("#interpret").click();
+ await page.locator("#update-model").click();
+ const metrics=await page.locator("#model-metrics").innerText();
+ if(!metrics.includes("150")||!metrics.includes("90")||!metrics.includes("40"))throw new Error("Parsed dimensions not reflected in model: "+metrics);
+ const downloadPromise=page.waitForEvent("download");
+ await page.locator("#export-stl").click();
+ const download=await downloadPromise,path=await download.path(),fs=await import("node:fs/promises"),stl=await fs.readFile(path,"utf8");
+ const facets=(stl.match(/facet normal/g)||[]).length;
+ if(facets!==12||!stl.startsWith("solid paid_model"))throw new Error("Box STL mesh invalid; facets="+facets);
+ await page.locator("#shape").selectOption("cylinder");
+ if(await page.locator("#box-fields").isVisible())throw new Error("Box fields should be hidden for cylinder");
+ await page.locator("#update-model").click();
+ if(!await page.locator("#model-preview svg").count())throw new Error("Cylinder preview missing");
+ if(errors.length)throw new Error("Browser errors: "+errors.join("; "));
+ console.log("Model Studio passed: mobile layout, missing-dimension prompt, parsed box dimensions, 12-facet STL export and cylinder preview.");
+}finally{await browser.close();}
