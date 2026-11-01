@@ -26,7 +26,8 @@ try {
   const page = await browser.newPage({ acceptDownloads: true, viewport: { width: 390, height: 844 } });
   const errors = [];
   page.on("pageerror", e => errors.push(e.message));
-  await page.goto("http://127.0.0.1:4173/", { waitUntil: "networkidle" });
+  const baseUrl = process.env.PAID_BASE_URL || "http://127.0.0.1:4173/";
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
   const layout = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: window.innerWidth }));
   if (layout.width > layout.viewport + 1) throw new Error("Mobile layout overflows horizontally: " + JSON.stringify(layout));
   await page.locator("#pdf-file").waitFor({ state: "visible" });
