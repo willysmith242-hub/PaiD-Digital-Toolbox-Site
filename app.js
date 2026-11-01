@@ -3,6 +3,7 @@
   const filters = [...document.querySelectorAll(".filter-chip")];
   const empty = document.getElementById("empty-state");
   const trayHost = document.getElementById("tool-trays");
+  let activeFilter = "all";
   const trayDefinitions = {
     engineering: { title: "Engineering tray", icon: "⚙", description: "Measurements, calculations, technical references and engineering work." },
     documents: { title: "Documents & PDF tray", icon: "▤", description: "PDF tools, document handling and drawing conversion." },
@@ -42,7 +43,8 @@
       card.hidden = !matches;
       if (matches) visible++;
     });
-    empty.hidden = visible !== 0;\n    trays.forEach(({ section, grid }) => { section.hidden = ![...grid.querySelectorAll(".tool-card")].some(card => !card.hidden); });
+    empty.hidden = visible !== 0;
+    trays.forEach(({ section, grid }) => { section.hidden = ![...grid.querySelectorAll(".tool-card")].some(card => !card.hidden); });
   }
   search.addEventListener("input", filterCards);
   filters.forEach(button => button.addEventListener("click", () => {
