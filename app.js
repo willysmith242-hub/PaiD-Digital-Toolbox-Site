@@ -8,7 +8,8 @@
     engineering: { title: "Engineering tray", icon: "⚙", description: "Measurements, calculations, technical references and engineering work." },
     documents: { title: "Documents & PDF tray", icon: "▤", description: "PDF tools, document handling and drawing conversion." },
     design: { title: "CAD & design tray", icon: "▱", description: "2D drawings, 3D design and CAD software." },
-    productivity: { title: "Productivity tray", icon: "✳", description: "Everyday calculators, office tools and work helpers." }
+    productivity: { title: "Productivity tray", icon: "✳", description: "Everyday calculators, office tools and work helpers." },
+    modelling: { title: "AI Modelling tray", icon: "◇", description: "Create and edit starter 3D models from explicit dimensions." }
   };
   const cards = [...trayHost.querySelectorAll(".tool-card")];
   const trays = new Map();
