@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 
-function makeVectorPdf(stream = "0 0 100 100 re S\\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\\n") {
+function makeVectorPdf(stream = "0 0 m 100 0 l 100 100 l 0 100 l h S\nBT /F1 12 Tf 20 120 Td (PAID TEST) Tj ET\n") {
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
@@ -60,7 +60,7 @@ try {
   if (lineCount < 4) throw new Error("Expected at least 4 LINE entities for the PDF rectangle, found " + lineCount + "; entities preview: " + entities.slice(0, 3000));
   if (textCount < 1) throw new Error("Expected a TEXT entity from the PDF label, found " + textCount + "; entities preview: " + entities.slice(0, 3000));
   // Exercise a second PDF containing a cubic Bezier curve, not just a rectangle.
-  await page.locator("#pdf-file").setInputFiles({ name: "paid-curve-smoke-test.pdf", mimeType: "application/pdf", buffer: makeVectorPdf("20 20 m 50 100 100 100 130 20 c S\\nBT /F1 12 Tf 20 120 Td (CURVE TEST) Tj ET\\n") });
+  await page.locator("#pdf-file").setInputFiles({ name: "paid-curve-smoke-test.pdf", mimeType: "application/pdf", buffer: makeVectorPdf("20 20 m 50 100 100 100 130 20 c S\nBT /F1 12 Tf 20 120 Td (CURVE TEST) Tj ET\n") });
   const secondDownloadPromise = page.waitForEvent("download", { timeout: 30000 }).catch(() => null);
   await page.locator("#pdf-convert-button").click();
   await page.waitForFunction(() => { const s = document.querySelector("#pdf-converter-status")?.textContent || ""; return s.includes("DXF download started") || s.includes("Conversion failed") || s.includes("did not load"); }, { timeout: 30000 });
