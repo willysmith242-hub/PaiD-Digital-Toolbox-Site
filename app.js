@@ -1,9 +1,37 @@
 (() => {
   const search = document.getElementById("tool-search");
-  const cards = [...document.querySelectorAll(".tool-card")];
   const filters = [...document.querySelectorAll(".filter-chip")];
   const empty = document.getElementById("empty-state");
-  let activeFilter = "all";
+  const trayHost = document.getElementById("tool-trays");
+  const trayDefinitions = {
+    engineering: { title: "Engineering tray", icon: "⚙", description: "Measurements, calculations, technical references and engineering work." },
+    documents: { title: "Documents & PDF tray", icon: "▤", description: "PDF tools, document handling and drawing conversion." },
+    design: { title: "CAD & design tray", icon: "▱", description: "2D drawings, 3D design and CAD software." },
+    productivity: { title: "Productivity tray", icon: "✳", description: "Everyday calculators, office tools and work helpers." }
+  };
+  const cards = [...trayHost.querySelectorAll(".tool-card")];
+  const trays = new Map();
+  for (const [category, definition] of Object.entries(trayDefinitions)) {
+    const section = document.createElement("section");
+    section.className = "tool-tray";
+    section.dataset.tray = category;
+    const heading = document.createElement("div");
+    heading.className = "tool-tray-heading";
+    const title = document.createElement("h3");
+    title.textContent = definition.icon + "  " + definition.title;
+    const description = document.createElement("p");
+    description.textContent = definition.description;
+    heading.append(title, description);
+    const grid = document.createElement("div");
+    grid.className = "tool-tray-grid";
+    section.append(heading, grid);
+    trayHost.append(section);
+    trays.set(category, { section, grid });
+  }
+  cards.forEach(card => {
+    const tray = trays.get(card.dataset.category);
+    if (tray) tray.grid.append(card);
+  });
 
   function filterCards() {
     const query = (search.value || "").trim().toLowerCase();
@@ -14,7 +42,7 @@
       card.hidden = !matches;
       if (matches) visible++;
     });
-    empty.hidden = visible !== 0;
+    empty.hidden = visible !== 0;\n    trays.forEach(({ section, grid }) => { section.hidden = ![...grid.querySelectorAll(".tool-card")].some(card => !card.hidden); });
   }
   search.addEventListener("input", filterCards);
   filters.forEach(button => button.addEventListener("click", () => {
